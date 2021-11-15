@@ -4,7 +4,9 @@ const Workouts = require("../models/workouts.js");
 
 router.get("/api/workouts", async (req, res) => {
   try {
-    let dbWorkout = await Workouts.find({}).sort({day: 1});
+    let dbWorkout = await Workouts.find({}).sort({
+      day: 1
+    });
     res.json(dbWorkout);
 
   } catch (err) {
@@ -14,9 +16,11 @@ router.get("/api/workouts", async (req, res) => {
 
 
 router.get("/api/workouts/range", async (req, res) => {
-  try {                                                                         
-    let dbWorkout = await Workouts.find({}).sort({date: -1})
-                                                                                   
+  try {
+    let dbWorkout = await Workouts.find({}).sort({
+      day: 1
+    })
+
 
     res.json(dbWorkout);
   } catch (err) {
@@ -24,38 +28,33 @@ router.get("/api/workouts/range", async (req, res) => {
   }
 });
 
-
-router.put('/api/workouts/:id', async (req, res) => {
+router.put("/api/workouts/:id", async (req, res) => {
   try {
-    const workoutData = await Workouts.update(req.body, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    if (!workoutData[0]) {
-      res.status(404).json({
-        message: 'No workout with this id!'
-      });
-      return;
-    }
-    res.status(200).json(workoutData);
+    let updateWorkout = await Workouts.updateOne({
+      _id: req.params.id
+    }, {
+      $push: {
+        exercises: req.body
+      }
+    })
+    res.json(updateWorkout);
   } catch (err) {
-    res.status(500).json(err);
+    console.log(err);
+    res.status(400).json(err);
   }
 });
 
-router.post("/api/workouts/bulk", async ({
+router.post("/api/workouts", async ({
   body
 }, res) => {
   try {
-    let dbWorkout = await Workouts.insertMany(body)
-
-    res.json(dbWorkout);
+    let newWorkout = await Workouts.create(body);
+    res.json(newWorkout);
   } catch (err) {
-
-    res.status(400).json(err);
+    res.status(400).json(err)
   }
 });
+
 
 
 
