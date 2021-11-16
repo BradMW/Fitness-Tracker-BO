@@ -1,7 +1,5 @@
 const router = require("express").Router();
-const {
-  Workouts
-} = require("../models/workouts.js");
+const Workouts = require("../models/workouts.js");
 const path = require("path");
 
 router.get("/", (req, res) =>
@@ -38,16 +36,16 @@ router.get("/api/workouts", async (req, res) => {
 //this GET route will return all the workouts in a 7 day range and display their total duration and weight used
 router.get("/api/workouts/range", async (req, res) => {
   try {
-    let dbWorkout = await Workouts.aggregate({
+    let dbWorkout = await Workouts.aggregate([{
       $addFields: {
         totalDuration: {
           $sum: "$exercises.duration"
         }
       }
-    }).sort({
-      _id: 1
+    }]).sort({
+      date: 1
     }).limit(7);
-
+    console.log(dbWorkout);
     res.json(dbWorkout);
   } catch (err) {
     res.status(400).json(err);
@@ -57,15 +55,15 @@ router.get("/api/workouts/range", async (req, res) => {
 //this PUT route will grab a workout by its ID, update it, and then push it to the array
 router.put("/api/workouts/:id", async (req, res) => {
   try {
-    let updateWorkout = await Workouts.findByIdAndUpdate(req.params.id,
-      {$push: {
+    const updateWorkout = await Workouts.findByIdAndUpdate(req.params.id, {
+      $push: {
         exercises: req.body
-      }},
-    {
+      }
+    }, {
       new: true
     })
-    
-    res.json(updateWorkout);
+    res.json(updateWorkout)
+
   } catch (err) {
     console.log(err);
     res.status(400).json(err);
@@ -76,6 +74,7 @@ router.put("/api/workouts/:id", async (req, res) => {
 router.post("/api/workouts", async (req, res) => {
   try {
     let newWorkout = await Workouts.create({});
+    console.log(newWorkout);
     res.json(newWorkout);
   } catch (err) {
     res.status(400).json(err)
